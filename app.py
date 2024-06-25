@@ -12,7 +12,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-from preprocess import text_clean, normalize, case_folding, stem_text, remove_stopwords, hapus_kata, tokenized
+from preprocess import text_clean as tc, normalize as norm, case_folding as cf, stemmer as st, stop_remover as rs, hapus_kata as hk, tokenized as tk
 
 app = Flask(__name__)
 consumer_key = "2t5oIvUJUALUSQsv80GBPgzcK"
@@ -220,13 +220,13 @@ def tfidf():
     global vectorizer
     global classifier
     df = pd.read_csv(data, sep=';')
-    df['text_clean'] = df['text'].apply(lambda x: fpre.text_clean(x))
-    df['normalize_text'] = df['text_clean'].apply(lambda x: normalize(x))
-    df['case_folding'] = df['normalize_text'].apply(lambda x: fpre.case_folding(x))
-    df['stem_text'] = df['case_folding'].apply(lambda x: fpre.stem_text(x))
-    df['stopword'] = df['stem_text'].apply(lambda x: fpre.remove_stopwords(x))
-    df['hapus_kata'] = df['stopword'].apply(lambda x: fpre.hapus_kata(x))
-    df['stopword'] = df['tokenized'].apply(lambda x: fpre.tokenized(x))
+    df['text_clean'] = df['text'].apply(lambda x: remove(x))
+    df['normalize_text'] = df['text_clean'].apply(lambda x: norm(x))
+    df['case_folding'] = df['normalize_text'].apply(lambda x: cf(x))
+    df['stem_text'] = df['case_folding'].apply(lambda x: stemming(x))
+    df['stopword'] = df['stem_text'].apply(lambda x: stop_remover(x))
+    df['hapus_kata'] = df['stopword'].apply(lambda x: normalize(x))
+    df['stopword'] = df['tokenized'].apply(lambda x: tokenizing(x))
     df['tokenized_text'] = df['tokenized'].apply(lambda x: ' '.join(x))
     table_html = df.to_html(classes='my-table', index=False)
     X = df['tokenized_text']
@@ -256,13 +256,13 @@ def input_param():
     global vectorizer
     global classifier
     df = pd.read_csv(data, sep=';')
-    df['text_clean'] = df['text'].apply(lambda x: fpre.text_clean(x))
-    df['normalize_text'] = df['text_clean'].apply(lambda x: normalize(x))
-    df['case_folding'] = df['normalize_text'].apply(lambda x: fpre.case_folding(x))
-    df['stem_text'] = df['case_folding'].apply(lambda x: fpre.stem_text(x))
-    df['stopword'] = df['stem_text'].apply(lambda x: fpre.remove_stopwords(x))
-    df['hapus_kata'] = df['stopword'].apply(lambda x: fpre.hapus_kata(x))
-    df['stopword'] = df['tokenized'].apply(lambda x: fpre.tokenized(x))
+    df['text_clean'] = df['text'].apply(lambda x: tk(x))
+    df['normalize_text'] = df['text_clean'].apply(lambda x: norm(x))
+    df['case_folding'] = df['normalize_text'].apply(lambda x: cf(x))
+    df['stem_text'] = df['case_folding'].apply(lambda x: st(x))
+    df['stopword'] = df['stem_text'].apply(lambda x: rs(x))
+    df['hapus_kata'] = df['stopword'].apply(lambda x: hk(x))
+    df['stopword'] = df['tokenized'].apply(lambda x: tk(x))
     df['tokenized_text'] = df['tokenized'].apply(lambda x: ' '.join(x))
     table_html = df.to_html(classes='my-table', index=False)
     X = df['tokenized_text']
