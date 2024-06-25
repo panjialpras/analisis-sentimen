@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Analisis Sentiment - Dashboard</title>
+    <link
+    href="../static/vendor/fontawesome-free/css/all.min.css"
+    rel="stylesheet"
+    type="text/css"
+  />
+  <link
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../static/css/sb-admin-2.css">
+  </head>
+  <body id="page-top">
+    <div id="wrapper">
+      <ul
+        class="navbar-nav bg-dark sidebar sidebar-dark accordion"
+        id="accordionSidebar"
+      >
+        <a
+          class="sidebar-brand d-flex align-items-center justify-content-center"
+          href="/"
+        >
+          <div class="sidebar-brand-icon">
+            <i class="fab fa-twitter" style="color: #4e73df;"></i>
+          </div>
+          <div class="sidebar-brand-text mx-3">Analisis Sentimen</div>
+        </a>
+        <hr class="sidebar-divider my-0" />
+        <li class="nav-item">
+          <a class="nav-link" href="/">
+            <i class="fas fa-fw fa-home" ></i>
+            <span>Dashboard</span></a
+          >
+        </li>
+        <hr class="sidebar-divider" />
+        <div class="sidebar-heading">Data</div>
+        <li class="nav-item">
+          <a class="nav-link" href="/scrap_data">
+            <i class="fas fa-fw fa-search"></i>
+            <span>Download Data</span></a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/process">
+            <i class="fas fa-fw fa-broom"></i>
+            <span>Pre-processing</span></a
+          >
+        </li>
+        <hr class="sidebar-divider" />
+        <div class="sidebar-heading">Analyze</div>
+        <li class="nav-item active">
+          <a class="nav-link" href="/naive_bayes">
+            <i class="fas fa-fw fa-chart-pie"></i>
+            <span>Naive Bayes</span></a
+          >
+        </li>
+        <hr class="sidebar-divider d-none d-md-block" />
+        <div class="text-center d-none d-md-inline">
+          <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+      </ul>
+          <div class="container-fluid">
+            <div
+              class="d-sm-flex align-items-center justify-content-between mb-4"
+            >
+              <h1 style="color: black;" class="mt-5">Naive Bayes</h1>
+            </div>
+            <!-- Approach -->
+            <div class="card shadow mb-4">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                  Learning and Testing Naive Bayes
+                </h6>
+              </div>
+              <div class="card-body">
+                <form action="/input_param" method="POST">
+                  <label for="test_size">Test Size:</label>
+                  <input type="number" id="test_size" name="test_size" step="0.01" min="0" max="1" value="0.1" required>
+                  <br>
+                  <br>
+                  <label for="random_state">Random State:</label>
+                  <input type="number" id="random_state" name="random_state" min="0" value="1" required><br><br>
+                  
+                  <input type="submit" value="Submit">
+                  <br>
+                  <br>
+                </form>
+                <h6>Hasil Learning dengan random_state {{ random_state }} dan test size sebesar {{ test_size }}</h6>
+                <p>Akurasi yang didapat dari data train sebesar <b>{{ accuracy }}</b> ditambah dengan hasil lain berupa:</p>
+                <table border="1" cellpadding="10" text-align="center">
+                  <tr style="background-color: #4e73df; color: black;">
+                    <td>Precision</td>
+                    <td>Recall</td>
+                    <td>F1-Score</td>
+                  </tr>
+                  <tr>
+                    <td>{{ precision }}</td>
+                    <td>{{ recall }}</td>
+                    <td>{{ f1 }}</td>
+                  </tr>
+                </table>
+                <br>
+                <br>
+                <form method="post" action="/predict">
+                    <label for="text">Masukkan teks</label><br>
+                    <textarea name="text" id="text" cols="50" rows="5" required placeholder="Pak Jokowi harusnya tidak bertindak seperti itu!!"></textarea>
+                    <br><br>
+                    <input type="submit" value="Predict">
+                  </form>
+                  {% if prediction is not none %}
+                  <h3>Result:</h3>
+                  <h1>{{ prediction }}</h1>
+                  {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../static/vendor/jquery/jquery.min.js"></script>
+    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="../static/js/sb-admin-2.min.js"></script>
+    <script src="../static/vendor/chart.js/Chart.min.js"></script>
+    <script src="../static/js/demo/chart-area-demo.js"></script>
+    <script src="../static/js/demo/chart-pie-demo.js"></script>
+  </body>
+</html>

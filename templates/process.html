@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Analisis Sentiment - Pre-processing</title>
+    <link
+      href="../static/vendor/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+      rel="stylesheet"
+    />
+    <style>
+      tr {
+        text-align: center;
+        
+      }
+      thead {
+        background-color: lightblue;
+      }
+    </style>
+    <link href="../static/css/sb-admin-2.css" rel="stylesheet" />
+  </head>
+  <body id="page-top">
+    <div id="wrapper">
+      <ul
+        class="navbar-nav bg-dark sidebar sidebar-dark accordion"
+        id="accordionSidebar"
+      >
+        <a
+          class="sidebar-brand d-flex align-items-center justify-content-center"
+          href="/"
+        >
+          <div class="sidebar-brand-icon">
+            <i class="fab fa-twitter" style="color: #4e73df;"></i>
+          </div>
+          <div class="sidebar-brand-text mx-3">Analisis Sentimen</div>
+        </a>
+        <hr class="sidebar-divider my-0" />
+        <li class="nav-item">
+          <a class="nav-link" href="/">
+            <i class="fas fa-fw fa-home" ></i>
+            <span>Dashboard</span></a
+          >
+        </li>
+        <hr class="sidebar-divider" />
+        <div class="sidebar-heading">Data</div>
+        <li class="nav-item">
+          <a class="nav-link" href="/scrap_data">
+            <i class="fas fa-fw fa-search"></i>
+            <span>Download Data</span></a
+          >
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/process">
+            <i class="fas fa-fw fa-broom"></i>
+            <span>Pre-processing</span></a
+          >
+        </li>
+        <hr class="sidebar-divider" />
+        <div class="sidebar-heading">Analyze</div>
+        <li class="nav-item">
+          <a class="nav-link" href="/naive_bayes">
+            <i class="fas fa-fw fa-chart-pie"></i>
+            <span>Naive Bayes</span></a
+          >
+        </li>
+        <hr class="sidebar-divider d-none d-md-block" />
+        <div class="text-center d-none d-md-inline">
+          <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+      </ul>
+          <div class="container-fluid">
+            <div
+              class="d-sm-flex align-items-center justify-content-between mb-4"
+            >
+              <h1 style="color: black;" class="mt-5">Pre-processing</h1>
+            </div>
+            <!-- Approach -->
+            <div class="card shadow mb-4">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                  Pre-processing & TF-IDF
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="container">
+                    <form
+                      method="POST"
+                      role="form"
+                      class="form-horizontal"
+                      enctype="multipart/form-data"
+                    >
+                      <div class="form-group">
+                        <span for="UploadFile">Input csv file</span>
+                        <input
+                          type="file"
+                          class="form-control-file"
+                          accept="file/*"
+                          name="file"
+                        />
+                      </div>
+
+                      <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                    </form>
+                    <br>
+                    <form action="/tfidf">
+                      <input type="submit" value="TF IDF" name="tfidf"/>
+                    </form>
+                    <a href="/tfidf">TF-IDF</a>
+                    <br>
+                  </div>
+                  <table class="table-fixed">
+                    {{table_html|safe}}
+                  </table>
+                  <br>
+                  </div>
+                    </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../static/vendor/jquery/jquery.min.js"></script>
+    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="../static/js/sb-admin-2.min.js"></script>
+    <script src="../static/vendor/chart.js/Chart.min.js"></script>
+    <script src="../static/js/demo/chart-area-demo.js"></script>
+    <script src="../static/js/demo/chart-pie-demo.js"></script>
+  </body>
+</html>
