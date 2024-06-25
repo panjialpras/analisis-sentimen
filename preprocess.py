@@ -62,8 +62,6 @@ def tokenized(str_text):
     str_text = re.split('\W+', str_text)
     return str_text
 
-dataset['tokenized'] = dataset['hapus_kata'].apply(lambda x: tokenized(x))
-
 # def tokenized_text(str_text):
 #     str_text['tokenized_text'] = str_text['tokenizing'].apply(lambda x: ' '.join(x))
 #     return str_text
