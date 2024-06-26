@@ -256,16 +256,14 @@ def input_param():
     global vectorizer
     global classifier
     df = pd.read_csv(data, sep=';')
-    df['text_clean'] = df['text'].apply(lambda x: tk(x))
-    df['normalize_text'] = df['text_clean'].apply(lambda x: norm(x))
-    df['case_folding'] = df['normalize_text'].apply(lambda x: cf(x))
-    df['stem_text'] = df['case_folding'].apply(lambda x: st(x))
-    df['stopword'] = df['stem_text'].apply(lambda x: rs(x))
-    df['hapus_kata'] = df['stopword'].apply(lambda x: hk(x))
-    df['stopword'] = df['tokenized'].apply(lambda x: tk(x))
-    df['tokenized_text'] = df['tokenized'].apply(lambda x: ' '.join(x))
+    df['Case Folding'] = df['text'].apply(lambda x: x.lower() if isinstance(x, str) else x)
+    df['Text Cleaning'] = df['Case Folding'].apply(lambda x: tc(x))
+    df.dropna(inplace=True)
+    df.drop_duplicates(inplace=True)
+    df['Tokenizing'] = df['Text Cleaning'].apply(lambda x: tk(x))
+    df['Normalize Text'] = df['Tokenizing'].apply(lambda x: norm(x))
     table_html = df.to_html(classes='my-table', index=False)
-    X = df['tokenized_text']
+    X = df['Normalize Text']
     y = df['sentiment']
     test_size = float(request.form['test_size'])
     random_state = int(request.form['random_state'])

@@ -29,8 +29,9 @@ norm = {'pgn':'ingin',' ntar ':'nanti ','kek ':' kayak ','dr.':'dokter',' udah '
         ,'sbg ':'sebagai', 'Yg':'Yang'}
 
 def normalize(str_text):
-    for a in norm:
-        str_text = str_text.replace(a, norm[a])
+    for i in range(len(str_text)):
+        for a in norm:
+            str_text[i] = str_text[i].replace(a, norm[a])
     return str_text
 
 def case_folding(str_text):
