@@ -219,13 +219,7 @@ def hitung_tfidf():
 def tfidf():
     global vectorizer
     global classifier
-    df = pd.read_csv(data, sep=';') 
-    # df['text_clean'] = df['text'].apply(remove(df))
-    # df['normalize_text'] = df['text_clean'].apply(normalize(df))
-    # df['stem_text'] = df['normalize_text'].apply(stemming(df))
-    # df['tokenized'] = df['stem_text'].apply(stopword(df))
-    # df['stopword'] = df['tokenized'].apply(tokenizing(df))
-    # df['tokenized_text'] = df['tokenized'].apply(' '.join(df))
+    df = pd.read_csv(data, sep=';')
     global vectorizer
     global classifier
     df = pd.read_csv(data, sep=';')
