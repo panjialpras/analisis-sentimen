@@ -219,22 +219,28 @@ def hitung_tfidf():
 def tfidf():
     global vectorizer
     global classifier
+    df = pd.read_csv(data, sep=';') 
+    # df['text_clean'] = df['text'].apply(remove(df))
+    # df['normalize_text'] = df['text_clean'].apply(normalize(df))
+    # df['stem_text'] = df['normalize_text'].apply(stemming(df))
+    # df['tokenized'] = df['stem_text'].apply(stopword(df))
+    # df['stopword'] = df['tokenized'].apply(tokenizing(df))
+    # df['tokenized_text'] = df['tokenized'].apply(' '.join(df))
+    global vectorizer
+    global classifier
     df = pd.read_csv(data, sep=';')
-    df['text_clean'] = df['text'].apply(lambda x: remove(x))
-    df['normalize_text'] = df['text_clean'].apply(lambda x: norm(x))
-    df['case_folding'] = df['normalize_text'].apply(lambda x: cf(x))
-    df['stem_text'] = df['case_folding'].apply(lambda x: stemming(x))
-    df['stopword'] = df['stem_text'].apply(lambda x: stop_remover(x))
-    df['hapus_kata'] = df['stopword'].apply(lambda x: normalize(x))
-    df['stopword'] = df['tokenized'].apply(lambda x: tokenizing(x))
-    df['tokenized_text'] = df['tokenized'].apply(lambda x: ' '.join(x))
+    df['Case Folding'] = df['text'].apply(lambda x: x.lower() if isinstance(x, str) else x)
+    df['Text Cleaning'] = df['Case Folding'].apply(lambda x: remove(x))
+    df.dropna(inplace=True)
+    df.drop_duplicates(inplace=True)
+    df['Tokenizing'] = df['Text Cleaning'].apply(tokenizing)
+    df['Normalize Text'] = df['Tokenizing'].apply(normalize)
     table_html = df.to_html(classes='my-table', index=False)
-    X = df['tokenized_text']
+    X = df['Normalize Text']
     y = df['sentiment']
     test_size = 0.1
     random_state = 1
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     X_train = [' '.join(tokens) for tokens in X_train]
     X_test = [' '.join(tokens) for tokens in X_test]
     vectorizer = TfidfVectorizer()
