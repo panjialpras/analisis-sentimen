@@ -12,13 +12,13 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-from preprocess import text_clean as tc, normalize as norm, case_folding as cf, stemmer as st, stop_remover as rs, hapus_kata as hk, tokenized as tk
+# from preprocess import text_clean as tc, normalize as norm, case_folding as cf, stemmer as st, stop_remover as rs, hapus_kata as hk, tokenized as tk
 
 app = Flask(__name__)
-consumer_key = "2t5oIvUJUALUSQsv80GBPgzcK"
-consumer_secret = "VTqeDj3cN6laPutp8Imcs1NFSCIu8519yoFtzr6MKyNQdBIBnL"
-access_token = "1465978930381434884-yp0MSCbWKudobPIjA4UQ98e829JH4N"
-access_secret = "vagmB3lEkhVEeMrg68JP025leESesy9XPuNujnjK4nB1R"
+consumer_key = ""
+consumer_secret = ""
+access_token = ""
+access_secret = ""
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_secret)
 api = tweepy.API(auth)
@@ -29,6 +29,7 @@ words = None
 data = "C:/Users/HP/Documents/Berkas Penting/Tugas Kuliah/Semester 8/Tugas Akhir/CD/flask/dataset/dataset.csv"
 vectorizer = None
 classifier = None
+table_html = None
 
 # fungsi remove digunakan untuk menghapus karakter tertentu
 
@@ -89,7 +90,7 @@ def home():
 
 @app.route("/scrap_data")
 def crawling():
-    return render_template("scrap_data.html")
+    return render_template("download.html")
 
 
 @app.route('/download_data', methods=["POST"])
@@ -124,7 +125,7 @@ def download_csv():
 def preprocess():
     global df
     if request.method == 'GET':
-        return render_template('process.html')
+        return render_template('preprocess.html')
     elif request.method == 'POST':
         global words
         csv_file = request.files.get('file')
@@ -184,9 +185,14 @@ def preprocess():
             'TF-IDF': [tfidf_dict[(sentiment_class, word)] for sentiment_class, word in tfidf_dict.keys()]
         })
 
-        table_html = df.to_html(classes='my-table', index=False)
-        return render_template('process.html', table_html=table_html)
+        global table_html
+        table_html = df.to_html(classes='table table-hover', index=False)
+        return redirect(url_for('result'))
 
+@app.route('/result', methods=["GET", "POST"])
+def result():
+    global table_html
+    return render_template('processed.html', table_html=table_html)
 
 @app.route('/tfidf', methods=["GET", "POST"])
 def hitung_tfidf():
@@ -205,11 +211,11 @@ def hitung_tfidf():
 
         # Render the template with the separate tables for each sentiment class
         positive_table_html = positive_tfidf_scores.to_html(
-            classes='my-table', index=False)
+            classes='table table-hover', index=False)
         negative_table_html = negative_tfidf_scores.to_html(
-            classes='my-table', index=False)
+            classes='table table-hover', index=False)
         neutral_table_html = neutral_tfidf_scores.to_html(
-            classes='my-table', index=False)
+            classes='table table-hover', index=False)
         return render_template('tfidf.html', positive_table_html=positive_table_html, negative_table_html=negative_table_html, neutral_table_html=neutral_table_html)
     else:
         return "No TF-IDF scores available"
