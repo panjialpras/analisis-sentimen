@@ -85,12 +85,14 @@ def normalize(str_text):
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    title = 'Home'
+    return render_template('index.html', title=title)
 
 
 @app.route("/scrap_data")
 def crawling():
-    return render_template("download.html")
+    title = 'Download data'
+    return render_template("download.html", title=title)
 
 
 @app.route('/download_data', methods=["POST"])
@@ -123,6 +125,7 @@ def download_csv():
 
 @app.route("/process", methods=["GET", "POST"])
 def preprocess():
+    title = 'Pre-processing'
     global df
     if request.method == 'GET':
         return render_template('preprocess.html')
@@ -187,7 +190,7 @@ def preprocess():
 
         global table_html
         table_html = df.to_html(classes='table table-hover', index=False)
-        return redirect(url_for('result'))
+        return redirect(url_for('result'), title=title)
 
 @app.route('/result', methods=["GET", "POST"])
 def result():
@@ -223,6 +226,7 @@ def hitung_tfidf():
 
 @app.route('/naive_bayes', methods=["POST", "GET"])
 def tfidf():
+    title = 'Naive Bayes'
     global vectorizer
     global classifier
     df = pd.read_csv(data, sep=';')
@@ -254,7 +258,7 @@ def tfidf():
         y_test, y_pred, average='macro') * 100, 2)
     recall = round(recall_score(y_test, y_pred, average='macro') * 100, 2)
     f1 = round(f1_score(y_test, y_pred, average='macro') * 100, 2)
-    return render_template('nb.html', table_html=table_html, accuracy=accuracy, precision=precision, recall=recall, f1=f1, random_state=random_state, test_size=test_size)
+    return render_template('nb.html', table_html=table_html, accuracy=accuracy, precision=precision, recall=recall, f1=f1, random_state=random_state, test_size=test_size, title=title)
 
 
 @app.route('/input_param', methods=["POST", "GET"])
