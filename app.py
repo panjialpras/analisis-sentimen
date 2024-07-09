@@ -1,9 +1,7 @@
-import re
 import io
 import csv
 import math
 import tweepy
-import string
 import pandas as pd
 from flask import *
 from sklearn.naive_bayes import MultinomialNB
@@ -13,6 +11,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 from preprocess import remove, tokenizing, stopword, stemming, normalize
+from tfidf import compute_idf, compute_tf, compute_tfidf
 
 app = Flask(__name__)
 consumer_key = ""
@@ -30,6 +29,7 @@ data = "./dataset.csv"
 vectorizer = None
 classifier = None
 table_html = None
+result_df = None
 
 
 @app.route("/")
@@ -75,7 +75,7 @@ def download_csv():
 @app.route("/process", methods=["GET", "POST"])
 def preprocess():
     title = 'Pre-processing'
-    global df
+    global df, table_html, result_df
     if request.method == 'GET':
         return render_template('preprocess.html')
     elif request.method == 'POST':
@@ -92,53 +92,38 @@ def preprocess():
         df['Stemming'] = df['Normalize Text'].apply(stemming, stemmer=stemmer)
         df['Stopword'] = df['Stemming'].apply(
             stopword, stop_remover=stop_remover)
-
-        words = df['Tokenizing'].apply(pd.Series).stack().unique()
-        df['Sentiment Class'] = df['sentiment'].apply(
-            lambda x: 'Positif' if x == 1 else ('Negatif' if x == -1 else 'Netral'))
-
-        # Hitung Term Frequency (TF) untuk tiap kata, tiap kelas sentimen
-        tf_dict = {}
-        for sentiment_class in ['Positif', 'Negatif', 'Netral']:
-            df_class = df[df['Sentiment Class'] == sentiment_class]
-            words_class = df_class['Normalize Text'].apply(
-                pd.Series).stack().unique()
-            for word in words_class:
-                tf_dict[(sentiment_class, word)] = max(row.count(word)
-                                                       for row in df_class['Normalize Text'])
-
-        # Menghitung Inverse Document Frequency (IDF) untuk setiap kata
-        num_docs = len(df)
-        idf_dict = {}
-        for word in words:
-            num_docs_with_word = sum(
-                1 for row in df['Normalize Text'] if word in row)
-            if num_docs_with_word > 0:
-                idf_dict[word] = math.log(num_docs / num_docs_with_word)
-
-        # Hitung skor TF-IDF untuk setiap kata, tiap kelas sentimen
-        tfidf_dict = {}
-        for sentiment_class in ['Positif', 'Negatif', 'Netral']:
-            df_class = df[df['Sentiment Class'] == sentiment_class]
-            words_class = pd.DataFrame(
-                df_class['Normalize Text'].apply(pd.Series)).stack().unique()
-
-            for word in words_class:
-                tfidf_dict[(sentiment_class, word)] = tf_dict[(
-                    sentiment_class, word)] * idf_dict[word]
-
-        # Simpan hasil TF-IDF dalam variabel global
-        global tfidf_scores
-        tfidf_scores = pd.DataFrame({
-            'Sentiment Class': [sentiment_class for sentiment_class, word in tfidf_dict.keys()],
-            'Word': [word for sentiment_class, word in tfidf_dict.keys()],
-            'TF': [tf_dict[(sentiment_class, word)] for sentiment_class, word in tfidf_dict.keys()],
-            'IDF': [idf_dict[word] for sentiment_class, word in tfidf_dict.keys()],
-            'TF-IDF': [tfidf_dict[(sentiment_class, word)] for sentiment_class, word in tfidf_dict.keys()]
-        })
-
-        global table_html
-        table_html = df.to_html(classes='table table-hover', index=False)
+        
+        # Filtering sentiment classes
+        positive_df = df[df['sentiment'] == 1]
+        negative_df = df[df['sentiment'] == -1]
+        neutral_df = df[df['sentiment'] == 0]
+        
+        sentiment_classes = {1: positive_df, -1: negative_df, 0: neutral_df}
+        
+        result = []
+        for sentiment, class_df in sentiment_classes.items():
+            word_set = set()
+            docs = []
+            for doc in class_df['text']:
+                bow = doc.split()
+                word_dict = dict.fromkeys(bow, 0)
+                for word in bow:
+                    word_dict[word] += 1
+                docs.append(word_dict)
+                word_set.update(word_dict.keys())
+            
+            idfs = compute_idf(docs)
+            for doc in class_df['text']:
+                bow = doc.split()
+                word_dict = dict.fromkeys(bow, 0)
+                for word in bow:
+                    word_dict[word] += 1
+                tf = compute_tf(word_dict, bow)
+                tfidf = compute_tfidf(tf, idfs)
+                for word in tfidf:
+                    result.append([word, tf[word], idfs[word], tfidf[word], sentiment])    
+        result_df = pd.DatFrame(result, columns=['Word', 'TF', 'IDF', 'TF-IDF', 'sentiment class'])        
+        table_html = df.to_html(classes='table table-hover', index=False)        
         return redirect(url_for('result', title=title))
 
 @app.route('/result', methods=["GET", "POST"])
@@ -148,27 +133,9 @@ def result():
 
 @app.route('/tfidf', methods=["GET", "POST"])
 def hitung_tfidf():
-    global df
-    global tfidf_scores
-    if tfidf_scores is not None:
-        # Reset the index of tfidf_scores
-        tfidf_scores = tfidf_scores.reset_index(drop=True)
-        # Filter tfidf_scores berdasarkan sentiment class
-        positive_tfidf_scores = tfidf_scores[tfidf_scores['Sentiment Class'] ==
-                                             'Positif'].loc[tfidf_scores[tfidf_scores['Sentiment Class'] == 'Positif'].index]
-        negative_tfidf_scores = tfidf_scores[tfidf_scores['Sentiment Class'] ==
-                                             'Negatif'].loc[tfidf_scores[tfidf_scores['Sentiment Class'] == 'Negatif'].index]
-        neutral_tfidf_scores = tfidf_scores[tfidf_scores['Sentiment Class'] ==
-                                            'Netral'].loc[tfidf_scores[tfidf_scores['Sentiment Class'] == 'Netral'].index]
-
-        # Render the template with the separate tables for each sentiment class
-        positive_table_html = positive_tfidf_scores.to_html(
-            classes='table table-hover', index=False)
-        negative_table_html = negative_tfidf_scores.to_html(
-            classes='table table-hover', index=False)
-        neutral_table_html = neutral_tfidf_scores.to_html(
-            classes='table table-hover', index=False)
-        return render_template('tfidf.html', positive_table_html=positive_table_html, negative_table_html=negative_table_html, neutral_table_html=neutral_table_html)
+    global result_df
+    if result_df is not None:
+        return render_template('tfidf.html', tables=[result_df.to_html(classes='table table-hover')], titles=result_df.columns.values)
     else:
         return "No TF-IDF scores available"
 
@@ -219,7 +186,7 @@ def input_param():
     df['Text Cleaning'] = df['Case Folding'].apply(lambda x: remove(x))
     df.dropna(inplace=True)
     df.drop_duplicates(inplace=True)
-    df['Tokenizing'] = df['Text Cleaning'].apply(lambda x: tokenzing(x))
+    df['Tokenizing'] = df['Text Cleaning'].apply(lambda x: tokenizing(x))
     df['Normalize Text'] = df['Tokenizing'].apply(lambda x: normalize(x))
     table_html = df.to_html(classes='my-table', index=False)
     X = df['Normalize Text']

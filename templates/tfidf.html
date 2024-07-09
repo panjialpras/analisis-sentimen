@@ -14,10 +14,7 @@ content %}
                 <div class="text-center">
                   <h4 class="mt-1 mb-2 pb-1">Data processed</h4>
                 </div>
-                <div class="table-responsive">
-                  {{ positive_table_html | safe }} {{ negative_table_html | safe
-                  }} {{ neutral_table_html | safe }}
-                </div>
+                <div class="table-responsive">{{ tables[0] | safe}}</div>
               </div>
             </div>
           </div>
