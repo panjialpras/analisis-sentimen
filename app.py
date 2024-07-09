@@ -12,7 +12,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-# from preprocess import text_clean as tc, normalize as norm, case_folding as cf, stemmer as st, stop_remover as rs, hapus_kata as hk, tokenized as tk
+from preprocess import remove, tokenizing, stopword, stemming, normalize
 
 app = Flask(__name__)
 consumer_key = ""
@@ -26,61 +26,10 @@ stemmer = StemmerFactory().create_stemmer(True)
 stop_remover = StopWordRemoverFactory().create_stop_word_remover()
 tfidf_scores = None
 words = None
-data = "C:/Users/HP/Documents/Berkas Penting/Tugas Kuliah/Semester 8/Tugas Akhir/CD/flask/dataset/dataset.csv"
+data = "./dataset.csv"
 vectorizer = None
 classifier = None
 table_html = None
-
-# fungsi remove digunakan untuk menghapus karakter tertentu
-
-def remove(text):
-    text = re.sub('[0-9]+', '', str(text))
-    text = re.sub(r'\$\w*', '', str(text))
-    text = re.sub(r'rt :[\s]+', '', str(text))
-    text = re.sub("b'|b\"", '', str(text))
-    text = re.sub(r"(?:\@|http?\://|https?\://|www)\S+", "", str(text))
-    text = text.translate(str.maketrans('', '', string.punctuation))
-    text = re.sub('<.*?>', '', str(text))
-    text = re.sub("\n", " ", str(text))
-    text = re.sub(r"\b[a-zA-Z]\b", "", str(text))
-    text = re.sub(r',', '', str(text))
-    text = re.sub(r'#', '', str(text))
-    # text = ' '.join(text.split())
-    text = text.encode('ascii', 'replace').decode('ascii')
-    return text
-
-# tokenizing memisah tiap kalimat menjadi beberapa pecahan kata
-
-def tokenizing(text):
-    x = text.split()
-    return x
-
-# Stopword menghapus kata yang tidak mengandung arti
-
-def stopword(text, stop_remover):
-    text = stop_remover.remove(text)
-    return text
-
-
-# Stemmer menghapus kata yang memiliki imbuhan
-def stemming(text, stemmer):
-    text = stemmer.stem(str(text))
-    return text
-
-
-# Normasisasi kata
-norm = {'mahasi': 'mahasiswa', 'penga': 'Pengawasan ', 'kek': ' kayak ', 'dr.': 'dokter', ' udah ': ' sudah ', 'sdh ': 'sudah ', 'mw ': 'mau',
-        ' ga ': 'tidak', 'yg ': 'yang ', 'tak ': 'tidak', 'hrs ': 'harus', 'bp ': 'bapak', 'krn': 'karena', 'dlm': 'dalam', ' dr ': 'dari',
-        'kpd': 'kepada', 'klo': 'kalau', 'tdk': 'tidak', 'dgn': 'dengan', 'dg': 'dengan', 'trus': 'terus', 'bwh': 'bawah', 'tsb': 'tersebut',
-        'tp': 'tapi', 'tpi': 'tapi', 'bkn': 'bukan', 'ttg ': 'tentang', 'gnt ': 'ganti', 'bhwa': 'bahwa', 'skrg': 'sekarang',
-        ' ama ': ' sama', 'bnyk': 'banyak', 'gmn': 'bagaimana', 'dr. ': 'dokter', ' mo ': 'mau', 'atw ': 'atau', ' ri ': ' republik indonesia ', 'sbg ': 'sebagai', 'Yg': 'Yang'}
-
-
-def normalize(str_text):
-    for i in range(len(str_text)):
-        for a in norm:
-            str_text[i] = str_text[i].replace(a, norm[a])
-    return str_text
 
 
 @app.route("/")
@@ -190,7 +139,7 @@ def preprocess():
 
         global table_html
         table_html = df.to_html(classes='table table-hover', index=False)
-        return redirect(url_for('result'), title=title)
+        return redirect(url_for('result', title=title))
 
 @app.route('/result', methods=["GET", "POST"])
 def result():
@@ -267,11 +216,11 @@ def input_param():
     global classifier
     df = pd.read_csv(data, sep=';')
     df['Case Folding'] = df['text'].apply(lambda x: x.lower() if isinstance(x, str) else x)
-    df['Text Cleaning'] = df['Case Folding'].apply(lambda x: tc(x))
+    df['Text Cleaning'] = df['Case Folding'].apply(lambda x: remove(x))
     df.dropna(inplace=True)
     df.drop_duplicates(inplace=True)
-    df['Tokenizing'] = df['Text Cleaning'].apply(lambda x: tk(x))
-    df['Normalize Text'] = df['Tokenizing'].apply(lambda x: norm(x))
+    df['Tokenizing'] = df['Text Cleaning'].apply(lambda x: tokenzing(x))
+    df['Normalize Text'] = df['Tokenizing'].apply(lambda x: normalize(x))
     table_html = df.to_html(classes='my-table', index=False)
     X = df['Normalize Text']
     y = df['sentiment']
