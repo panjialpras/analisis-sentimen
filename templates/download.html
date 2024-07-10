@@ -16,25 +16,28 @@
                     Download Twitter Data Comments
                   </h4>
                 </div>
-                <form>
+                <form method="POST" action="/download_data">
                   <div class="form-outline mb-3">
-                    <label class="form-label mt-3" for="form2Example11"
-                      >Topic</label
-                    >
+                    <label class="form-label mt-3" for="query">Topic</label>
                     <input
                       type="text"
-                      id="form2Example11"
+                      id="query"
+                      name="query"
                       class="form-control"
                       placeholder="inflation"
+                      required
+                      autocomplete="off"
+                      autofocus
                     />
                   </div>
                   <div class="form-outline mb-3">
-                    <label class="form-label mt-3" for="form2Example22"
+                    <label class="form-label mt-3" for="count"
                       >Count data</label
                     >
                     <input
                       type="number"
-                      id="form2Example22"
+                      name="count"
+                      id="count"
                       class="form-control"
                       placeholder="10"
                     />
@@ -42,7 +45,7 @@
                   <div
                     class="d-flex align-items-center justify-content-center pb-4"
                   >
-                    <button type="button" class="btn btn-outline-primary">
+                    <button type="submit" class="btn btn-outline-primary">
                       Download
                     </button>
                   </div>

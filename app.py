@@ -1,8 +1,8 @@
 import io
 import csv
-import math
 import tweepy
 import pandas as pd
+import configparser
 from flask import *
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
@@ -14,12 +14,11 @@ from preprocess import remove, tokenizing, stopword, stemming, normalize
 from tfidf import compute_idf, compute_tf, compute_tfidf
 
 app = Flask(__name__)
-consumer_key = ""
-consumer_secret = ""
-access_token = ""
-access_secret = ""
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_secret)
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+auth = tweepy.OAuthHandler(config['API_KEYS']['api_key'], config['API_KEYS']['api_secret'])
+auth.set_access_token(config['API_KEYS']['access_token'], config['API_KEYS']['access_secret'])
 api = tweepy.API(auth)
 stemmer = StemmerFactory().create_stemmer(True)
 stop_remover = StopWordRemoverFactory().create_stop_word_remover()
@@ -122,7 +121,7 @@ def preprocess():
                 tfidf = compute_tfidf(tf, idfs)
                 for word in tfidf:
                     result.append([word, tf[word], idfs[word], tfidf[word], sentiment])    
-        result_df = pd.DatFrame(result, columns=['Word', 'TF', 'IDF', 'TF-IDF', 'sentiment class'])        
+        result_df = pd.DataFrame(result, columns=['Word', 'TF', 'IDF', 'TF-IDF', 'sentiment class'])        
         table_html = df.to_html(classes='table table-hover', index=False)        
         return redirect(url_for('result', title=title))
 
