@@ -22,7 +22,6 @@ auth.set_access_token(config['API_KEYS']['access_token'], config['API_KEYS']['ac
 api = tweepy.API(auth)
 stemmer = StemmerFactory().create_stemmer(True)
 stop_remover = StopWordRemoverFactory().create_stop_word_remover()
-tfidf_scores = None
 words = None
 data = "./dataset.csv"
 vectorizer = None

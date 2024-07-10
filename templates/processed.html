@@ -18,9 +18,10 @@ endblock %} {% block content %}
                   {{ table_html | safe }}
                   <div class="d-inline-flex justify-content-center mt-3">
                     <button
-                      type="button"
+                      type="submit"
                       class="btn btn-outline-secondary"
                       onclick="redirectToResult()"
+                      name="submit"
                     >
                       Go to Result TF-IDF
                     </button>
@@ -34,4 +35,9 @@ endblock %} {% block content %}
     </div>
   </div>
 </section>
+<script>
+  function redirectToResult() {
+    window.location.href = "/tfidf";
+  }
+</script>
 {% endblock %}
